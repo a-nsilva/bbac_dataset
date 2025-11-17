@@ -36,14 +36,14 @@ bbac-ics-simulator/
 ```
 
 
-┌─────────────────────┬────────────────┬────────────────┬──────────────┬────────────────┐
-│ Criterion           │ IEEE Data Desc.│ Scientific Data│ IEEE Access  │ Data in Brief  │
-├─────────────────────┼────────────────┼────────────────┼──────────────┼────────────────┤
-│ Specific datasets   │ Yes            │ Yes            │ No           │ Yes            │
+
+| Criterion           │ IEEE Data Desc.│ Scientific Data│ IEEE Access  │ Data in Brief  │
+|---------|----------|---------|----------|----------|
+| Specific datasets   │ Yes            │ Yes            │ No           │ Yes            │
 │ Pages               │ 4-8            │ ~10            │ <20          │ 2-3            │
 │ GitHub accepted     │ Yes + DOI      │ No             │ Yes + DOI    │ Yes + DOI      │
 │ Timeline            │ 2-4 months     │ 3-6 months     │ 2-4 months   │ 1-2 months     │
-└─────────────────────┴────────────────┴────────────────┴──────────────┴────────────────┘
+
 
 
 
