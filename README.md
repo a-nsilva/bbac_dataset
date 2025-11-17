@@ -37,7 +37,7 @@ bbac-ics-simulator/
 
 
 
-| Criterion           │ IEEE Data Desc.│ Scientific Data│ IEEE Access  │ Data in Brief  │
+| Criterion | IEEE Data Desc. | Scientific Data | IEEE Access | Data in Brief |
 |---------|----------|---------|----------|----------|
 | Specific datasets   │ Yes            │ Yes            │ No           │ Yes            │
 │ Pages               │ 4-8            │ ~10            │ <20          │ 2-3            │
@@ -88,7 +88,7 @@ bbac-ics-simulator/
 
 ### System resources
 
-| ID | Name	| Sensitivity	| Events	| Normal | Access Hours |
+| ID | Name | Sensitivity | Events | Normal | Access Hours |
 |----|------|---------------|---------|--------------------------|
 | RES_INV | inventory data	| medium | 12.766 | 06:00-22:00 |
 | RES_PLAN | assembly plans	| high | 8.448 | 24/7 |
