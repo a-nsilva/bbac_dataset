@@ -1,0 +1,894 @@
+"""
+BBAC Framework - Data Structure Schemas
+========================================
+Definição completa da estrutura de dados para o sistema BBAC
+baseado no fluxograma de análise e arquitetura ROS2.
+
+Author: BBAC Team
+Date: 2026-01-09
+Python: 3.10+
+Dependencies: pydantic>=2.0
+"""
+
+from datetime import datetime
+from typing import Optional, List, Dict, Literal, Any
+from enum import Enum
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+
+
+# ============================================================================
+# ENUMS - Definições de valores categóricos
+# ============================================================================
+
+class AgentType(str, Enum):
+    """Tipos de agentes no sistema"""
+    ROBOT = "robot"
+    HUMAN = "human"
+    SYSTEM = "system"
+
+
+class RobotType(str, Enum):
+    """Tipos específicos de robôs"""
+    ASSEMBLY = "assembly_robot"
+    CAMERA = "camera_robot"
+    INSPECTION = "inspection_robot"
+    TRANSPORT = "transport_robot"
+
+
+class HumanRole(str, Enum):
+    """Papéis de usuários humanos"""
+    SUPERVISOR = "supervisor"
+    OPERATOR = "operator"
+    TECHNICIAN = "technician"
+    ADMIN = "admin"
+
+
+class ActionType(str, Enum):
+    """Tipos de ações possíveis"""
+    READ = "read"
+    WRITE = "write"
+    EXECUTE = "execute"
+    DELETE = "delete"
+    MODIFY = "modify"
+    ACCESS = "access"
+    MONITOR = "monitor"
+
+
+class ResourceType(str, Enum):
+    """Tipos de recursos"""
+    SENSOR = "sensor"
+    ACTUATOR = "actuator"
+    CAMERA = "camera"
+    DATABASE = "database"
+    CONFIG = "config"
+    TOOL = "tool"
+    ZONE = "zone"
+
+
+class AccessDecision(str, Enum):
+    """Decisões de controle de acesso"""
+    GRANT_FULL = "grant_full_access"
+    GRANT_MONITORING = "grant_monitoring"
+    CHALLENGE_MFA = "challenge_mfa_required"
+    DENY = "deny_blocked"
+
+
+class AnomalyType(str, Enum):
+    """Tipos de anomalia detectados"""
+    TEMPORAL = "temporal_anomaly"
+    BEHAVIORAL = "behavioral_anomaly"
+    FREQUENCY = "frequency_anomaly"
+    SEQUENCE = "sequence_anomaly"
+    RESOURCE = "resource_anomaly"
+    NONE = "no_anomaly"
+
+
+# ============================================================================
+# SCHEMA 1: RAW LOG ENTRY (Entrada do Sistema)
+# ============================================================================
+
+class RawLogEntry(BaseModel):
+    """
+    Schema do log bruto de entrada do sistema.
+    Representa uma única requisição de acesso.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "log_id": "log_20260109_123456_001",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "user_id": "robot_assembly_01",
+            "agent_type": "robot",
+            "robot_type": "assembly_robot",
+            "human_role": None,
+            "action": "read",
+            "resource": "sensor_temperature_zone_a",
+            "resource_type": "sensor",
+            "human_present": False,
+            "emergency_flag": False,
+            "session_id": "session_20260109_001"
+        }
+    })
+    
+    # Identificadores únicos
+    log_id: str = Field(..., description="ID único do log")
+    timestamp: datetime = Field(..., description="Timestamp da requisição")
+    session_id: str = Field(..., description="ID da sessão atual")
+    
+    # Identificação do agente
+    user_id: str = Field(..., description="ID do usuário/robô")
+    agent_type: AgentType = Field(..., description="Tipo do agente")
+    robot_type: Optional[RobotType] = Field(None, description="Tipo específico de robô")
+    human_role: Optional[HumanRole] = Field(None, description="Role do humano")
+    
+    # Detalhes da requisição
+    action: ActionType = Field(..., description="Ação solicitada")
+    resource: str = Field(..., description="ID do recurso acessado")
+    resource_type: ResourceType = Field(..., description="Tipo do recurso")
+    
+    # Contexto
+    human_present: bool = Field(False, description="Presença humana detectada")
+    emergency_flag: bool = Field(False, description="Flag de emergência")
+    
+    # Metadados adicionais
+    location: Optional[str] = Field(None, description="Localização física")
+    previous_action: Optional[str] = Field(None, description="Ação anterior na sequência")
+    
+    @field_validator('human_role')
+    @classmethod
+    def validate_human_role(cls, v, info):
+        """Valida que human_role só existe se agent_type é HUMAN"""
+        values = info.data
+        if values.get('agent_type') == AgentType.HUMAN and v is None:
+            raise ValueError("human_role é obrigatório para agentes humanos")
+        if values.get('agent_type') != AgentType.HUMAN and v is not None:
+            raise ValueError("human_role só pode existir para agentes humanos")
+        return v
+    
+    @field_validator('robot_type')
+    @classmethod
+    def validate_robot_type(cls, v, info):
+        """Valida que robot_type só existe se agent_type é ROBOT"""
+        values = info.data
+        if values.get('agent_type') == AgentType.ROBOT and v is None:
+            raise ValueError("robot_type é obrigatório para agentes robôs")
+        if values.get('agent_type') != AgentType.ROBOT and v is not None:
+            raise ValueError("robot_type só pode existir para agentes robôs")
+        return v
+
+
+# ============================================================================
+# SCHEMA 2: BASELINE FEATURES (Métricas da Linha Base Normal)
+# ============================================================================
+
+class BaselineMetrics(BaseModel):
+    """
+    Métricas calculadas da baseline normal de comportamento.
+    Baseado nos 4 módulos do fluxograma.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "user_id": "robot_assembly_01",
+            "calculation_date": "2026-01-09T00:00:00",
+            "total_logs_analyzed": 10000,
+            "normal_actions": {"read": 0.65, "write": 0.25, "execute": 0.10},
+            "normal_working_hours": [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+            "normal_resources": ["sensor_temp_01", "actuator_arm_01"],
+            "avg_time_gap_seconds": 45.5,
+            "human_presence_prob": 0.15
+        }
+    })
+    
+    # Identificação
+    user_id: str = Field(..., description="ID do usuário/robô")
+    calculation_date: datetime = Field(..., description="Data do cálculo da baseline")
+    total_logs_analyzed: int = Field(..., ge=0, description="Total de logs analisados")
+    
+    # Módulo 1: Ações Comuns (normal_actions)
+    normal_actions: Dict[str, float] = Field(
+        ..., 
+        description="Probabilidades de cada tipo de ação"
+    )
+    action_entropy: float = Field(..., ge=0.0, description="Entropia das ações")
+    
+    # Módulo 2: Horários Normais (normal_working_hours)
+    normal_working_hours: List[int] = Field(
+        ..., 
+        description="Lista de horas normais de operação (0-23)",
+        min_length=1,
+        max_length=24
+    )
+    peak_activity_hours: List[int] = Field(
+        ..., 
+        description="Horas de pico de atividade"
+    )
+    
+    # Módulo 3: Recursos Normais (normal_resources)
+    normal_resources: List[str] = Field(
+        ..., 
+        description="Lista de recursos frequentemente acessados"
+    )
+    resource_frequency: Dict[str, int] = Field(
+        ..., 
+        description="Frequência de acesso a cada recurso"
+    )
+    
+    # Módulo 4: Gap Temporal (avg_time_gap)
+    avg_time_gap_seconds: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Gap médio entre requisições (segundos)"
+    )
+    std_time_gap_seconds: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Desvio padrão do gap temporal"
+    )
+    median_time_gap_seconds: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Mediana do gap temporal"
+    )
+    
+    # Módulo 5: Presença Humana
+    human_presence_prob: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Probabilidade de presença humana"
+    )
+    
+    @field_validator('normal_working_hours')
+    @classmethod
+    def validate_hours(cls, v):
+        """Valida que as horas estão no range 0-23"""
+        if not all(0 <= h <= 23 for h in v):
+            raise ValueError("Horas devem estar entre 0 e 23")
+        return sorted(list(set(v)))  # Remove duplicatas e ordena
+    
+    @field_validator('normal_actions')
+    @classmethod
+    def validate_action_probabilities(cls, v):
+        """Valida que as probabilidades somam aproximadamente 1.0"""
+        total = sum(v.values())
+        if not (0.99 <= total <= 1.01):
+            raise ValueError(f"Soma das probabilidades deve ser ~1.0, obtido: {total}")
+        return v
+
+
+# ============================================================================
+# SCHEMA 3: EXTRACTED FEATURES (Features Extraídas para ML)
+# ============================================================================
+
+class ExtractedFeatures(BaseModel):
+    """
+    Features extraídas de cada log para análise e detecção de anomalias.
+    Baseado no bloco 'FEATURE EXTRACTION' do fluxograma.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "log_id": "log_20260109_123456_001",
+            "user_id": "robot_assembly_01",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "hour_of_day": 12,
+            "day_of_week": 4,
+            "is_weekend": False,
+            "time_since_last_action": 45.2,
+            "action_sequence_length": 5,
+            "resource_transition_count": 2,
+            "is_normal_hour": True,
+            "is_normal_action": True,
+            "is_normal_resource": True,
+            "human_present": False,
+            "safe_context": True
+        }
+    })
+    
+    # Identificadores
+    log_id: str = Field(..., description="ID do log original")
+    user_id: str = Field(..., description="ID do usuário/robô")
+    timestamp: datetime = Field(..., description="Timestamp do evento")
+    
+    # Features Temporais
+    hour_of_day: int = Field(..., ge=0, le=23, description="Hora do dia (0-23)")
+    day_of_week: int = Field(..., ge=0, le=6, description="Dia da semana (0=Seg, 6=Dom)")
+    is_weekend: bool = Field(..., description="É fim de semana?")
+    is_night_shift: bool = Field(..., description="É turno noturno? (22h-6h)")
+    
+    time_since_last_action: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Tempo desde última ação (segundos)"
+    )
+    action_duration: Optional[float] = Field(
+        None, 
+        ge=0.0, 
+        description="Duração da ação (segundos)"
+    )
+    
+    # Features Sequenciais
+    action_sequence_length: int = Field(
+        ..., 
+        ge=1, 
+        description="Tamanho da sequência atual de ações"
+    )
+    sequence_entropy: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Entropia da sequência de ações"
+    )
+    
+    # Features de Transição (Espacial/Recurso)
+    resource_transition_count: int = Field(
+        ..., 
+        ge=0, 
+        description="Número de transições de recurso"
+    )
+    same_resource_repetition: int = Field(
+        ..., 
+        ge=0, 
+        description="Repetições consecutivas do mesmo recurso"
+    )
+    
+    # Features de Normalidade (Baseline)
+    is_normal_hour: bool = Field(..., description="Está em horário normal?")
+    is_normal_action: bool = Field(..., description="É ação comum?")
+    is_normal_resource: bool = Field(..., description="É recurso comum?")
+    deviation_from_avg_gap: float = Field(
+        ..., 
+        description="Desvio do gap médio (normalizado)"
+    )
+    
+    # Features Contextuais
+    human_present: bool = Field(..., description="Presença humana detectada")
+    safe_context: bool = Field(..., description="Contexto seguro (não emergência)")
+    emergency_flag: bool = Field(False, description="Flag de emergência")
+    
+    # Features Administrativas
+    action_type_encoded: int = Field(..., ge=0, description="Action type codificado")
+    resource_type_encoded: int = Field(..., ge=0, description="Resource type codificado")
+    agent_type_encoded: int = Field(..., ge=0, description="Agent type codificado")
+
+
+# ============================================================================
+# SCHEMA 4: ANOMALY SCORES (Scores das Branches de Detecção)
+# ============================================================================
+
+class AnomalyScores(BaseModel):
+    """
+    Scores de anomalia calculados pelos dois branches (estatístico e sequencial).
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "log_id": "log_20260109_123456_001",
+            "user_id": "robot_assembly_01",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "statistical_score": 0.35,
+            "ks_test_statistic": 0.12,
+            "t_test_pvalue": 0.45,
+            "mad_score": 0.28,
+            "sequential_score": 0.42,
+            "sequence_prediction_error": 0.38,
+            "temporal_prediction_error": 0.46,
+            "policy_score": 0.0,
+            "final_score": 0.38,
+            "alpha_weight": 0.5
+        }
+    })
+    
+    # Identificadores
+    log_id: str = Field(..., description="ID do log")
+    user_id: str = Field(..., description="ID do usuário/robô")
+    timestamp: datetime = Field(..., description="Timestamp")
+    
+    # Branch 1: Estatístico (Score 1)
+    statistical_score: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Score estatístico agregado"
+    )
+    ks_test_statistic: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Kolmogorov-Smirnov statistic"
+    )
+    t_test_pvalue: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="T-test p-value"
+    )
+    mad_score: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Median Absolute Deviation score"
+    )
+    
+    # Branch 2: Sequencial (Score 2)
+    sequential_score: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Score sequencial agregado"
+    )
+    sequence_prediction_error: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Erro na predição de próxima ação"
+    )
+    temporal_prediction_error: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Erro na predição temporal"
+    )
+    
+    # Policy Score (Layer 1 - Rules)
+    policy_score: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Score baseado em regras e políticas"
+    )
+    
+    # Score Final Combinado
+    final_score: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Score final: α*(S1) + (1-α)*(S2) + α*policy"
+    )
+    alpha_weight: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Peso alpha usado na combinação"
+    )
+    
+    # Detalhes das Anomalias
+    anomaly_type: AnomalyType = Field(
+        AnomalyType.NONE, 
+        description="Tipo principal de anomalia detectada"
+    )
+    anomaly_confidence: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Confiança na detecção"
+    )
+    contributing_factors: List[str] = Field(
+        default_factory=list, 
+        description="Fatores que contribuíram para o score"
+    )
+
+
+# ============================================================================
+# SCHEMA 5: ACCESS DECISION (Decisão Final de Acesso)
+# ============================================================================
+
+class AccessDecisionRecord(BaseModel):
+    """
+    Registro da decisão de controle de acesso tomada pelo sistema.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "decision_id": "dec_20260109_123456_001",
+            "log_id": "log_20260109_123456_001",
+            "user_id": "robot_assembly_01",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "decision": "grant_full_access",
+            "final_score": 0.38,
+            "decision_latency_ms": 45.2,
+            "layer1_result": "pass",
+            "layer2_result": "normal",
+            "layer3_result": "no_anomaly",
+            "reasoning": "Score abaixo do limiar, comportamento normal",
+            "requires_monitoring": False,
+            "requires_mfa": False,
+            "blocked": False
+        }
+    })
+    
+    # Identificadores
+    decision_id: str = Field(..., description="ID único da decisão")
+    log_id: str = Field(..., description="ID do log associado")
+    user_id: str = Field(..., description="ID do usuário/robô")
+    timestamp: datetime = Field(..., description="Timestamp da decisão")
+    
+    # Decisão Final
+    decision: AccessDecision = Field(..., description="Decisão de acesso")
+    final_score: float = Field(..., ge=0.0, description="Score final usado")
+    confidence: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Confiança na decisão"
+    )
+    
+    # Performance
+    decision_latency_ms: float = Field(
+        ..., 
+        ge=0.0, 
+        description="Latência da decisão (milissegundos)"
+    )
+    
+    # Resultados por Camada (BBAC)
+    layer1_result: str = Field(..., description="Resultado Layer 1 (Rule-based)")
+    layer2_result: str = Field(..., description="Resultado Layer 2 (Behavioral)")
+    layer3_result: str = Field(..., description="Resultado Layer 3 (ML Anomaly)")
+    
+    # Detalhes da Decisão
+    reasoning: str = Field(..., description="Justificativa da decisão")
+    contributing_layers: List[str] = Field(
+        default_factory=list, 
+        description="Camadas que contribuíram para decisão"
+    )
+    
+    # Flags de Ação
+    requires_monitoring: bool = Field(False, description="Requer monitoramento?")
+    requires_mfa: bool = Field(False, description="Requer MFA?")
+    blocked: bool = Field(False, description="Acesso bloqueado?")
+    alert_generated: bool = Field(False, description="Alerta gerado?")
+    
+    # Metadados
+    override_applied: bool = Field(False, description="Override manual aplicado?")
+    override_by: Optional[str] = Field(None, description="Admin que fez override")
+
+
+# ============================================================================
+# SCHEMA 6: POST-ACCESS MONITORING (Monitoramento Pós-Acesso)
+# ============================================================================
+
+class PostAccessLog(BaseModel):
+    """
+    Log de atividades após concessão de acesso.
+    Para feedback e aprendizado contínuo.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "monitoring_id": "mon_20260109_123456_001",
+            "decision_id": "dec_20260109_123456_001",
+            "user_id": "robot_assembly_01",
+            "access_granted_at": "2026-01-09T12:34:56.789000",
+            "access_ended_at": "2026-01-09T12:45:30.123000",
+            "duration_seconds": 633.334,
+            "actions_performed": 15,
+            "anomalies_detected": 0,
+            "mfa_challenged": False,
+            "mfa_success": None,
+            "suspicious_activity": False,
+            "feedback_provided": True,
+            "feedback_type": "normal",
+            "admin_reviewed": False
+        }
+    })
+    
+    # Identificadores
+    monitoring_id: str = Field(..., description="ID único do monitoramento")
+    decision_id: str = Field(..., description="ID da decisão associada")
+    user_id: str = Field(..., description="ID do usuário/robô")
+    
+    # Timeline
+    access_granted_at: datetime = Field(..., description="Início do acesso")
+    access_ended_at: Optional[datetime] = Field(
+        None, 
+        description="Fim do acesso"
+    )
+    duration_seconds: Optional[float] = Field(
+        None, 
+        ge=0.0, 
+        description="Duração do acesso"
+    )
+    
+    # Atividades
+    actions_performed: int = Field(
+        ..., 
+        ge=0, 
+        description="Número de ações realizadas"
+    )
+    resources_accessed: List[str] = Field(
+        default_factory=list, 
+        description="Lista de recursos acessados"
+    )
+    
+    # Detecção durante acesso
+    anomalies_detected: int = Field(
+        ..., 
+        ge=0, 
+        description="Anomalias detectadas durante acesso"
+    )
+    anomaly_details: List[str] = Field(
+        default_factory=list, 
+        description="Detalhes das anomalias"
+    )
+    
+    # MFA Challenge (se aplicável)
+    mfa_challenged: bool = Field(False, description="MFA foi solicitado?")
+    mfa_success: Optional[bool] = Field(None, description="MFA bem-sucedido?")
+    mfa_attempts: int = Field(0, ge=0, description="Tentativas de MFA")
+    
+    # Avaliação
+    suspicious_activity: bool = Field(
+        False, 
+        description="Atividade suspeita detectada?"
+    )
+    risk_level: Literal["low", "medium", "high", "critical"] = Field(
+        "low", 
+        description="Nível de risco avaliado"
+    )
+    
+    # Feedback Loop
+    feedback_provided: bool = Field(
+        False, 
+        description="Feedback foi fornecido?"
+    )
+    feedback_type: Optional[Literal["normal", "false_positive", "true_positive", "escalate"]] = Field(
+        None, 
+        description="Tipo de feedback"
+    )
+    
+    # Revisão Administrativa
+    admin_reviewed: bool = Field(False, description="Revisado por admin?")
+    admin_notes: Optional[str] = Field(None, description="Notas do administrador")
+    
+    # Aprendizado
+    update_baseline: bool = Field(
+        False, 
+        description="Atualizar baseline com estes dados?"
+    )
+    update_model: bool = Field(
+        False, 
+        description="Usar para retreinar modelo?"
+    )
+
+
+# ============================================================================
+# SCHEMA 7: ROS2 MESSAGE TYPES (Para comunicação entre nós)
+# ============================================================================
+
+class ROS2AccessRequest(BaseModel):
+    """
+    Mensagem ROS2 para requisição de acesso.
+    Topic: /access_requests
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "request_id": "req_20260109_123456_001",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "user_id": "robot_assembly_01",
+            "agent_type": "robot",
+            "action": "read",
+            "resource": "sensor_temperature_zone_a",
+            "priority": "normal",
+            "emergency": False
+        }
+    })
+    
+    request_id: str = Field(..., description="ID único da requisição")
+    timestamp: datetime = Field(..., description="Timestamp da requisição")
+    user_id: str = Field(..., description="ID do solicitante")
+    agent_type: AgentType = Field(..., description="Tipo do agente")
+    action: ActionType = Field(..., description="Ação solicitada")
+    resource: str = Field(..., description="Recurso alvo")
+    priority: Literal["low", "normal", "high", "critical"] = Field(
+        "normal", 
+        description="Prioridade da requisição"
+    )
+    emergency: bool = Field(False, description="Requisição de emergência")
+
+
+class ROS2AccessResponse(BaseModel):
+    """
+    Mensagem ROS2 para resposta de acesso.
+    Topic: /access_decisions
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "response_id": "resp_20260109_123456_001",
+            "request_id": "req_20260109_123456_001",
+            "timestamp": "2026-01-09T12:34:56.834000",
+            "decision": "grant_full_access",
+            "latency_ms": 45.0,
+            "requires_mfa": False,
+            "reasoning": "Normal behavior pattern",
+            "monitoring_required": False
+        }
+    })
+    
+    response_id: str = Field(..., description="ID único da resposta")
+    request_id: str = Field(..., description="ID da requisição original")
+    timestamp: datetime = Field(..., description="Timestamp da resposta")
+    decision: AccessDecision = Field(..., description="Decisão de acesso")
+    latency_ms: float = Field(..., ge=0.0, description="Latência de processamento")
+    requires_mfa: bool = Field(False, description="Requer autenticação MFA")
+    reasoning: str = Field(..., description="Justificativa da decisão")
+    monitoring_required: bool = Field(
+        False, 
+        description="Monitoramento contínuo necessário"
+    )
+
+
+class ROS2EmergencyAlert(BaseModel):
+    """
+    Mensagem ROS2 para alertas de emergência.
+    Topic: /emergency_alerts
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "alert_id": "alert_20260109_123456_001",
+            "timestamp": "2026-01-09T12:34:56.789000",
+            "severity": "high",
+            "alert_type": "anomaly_detected",
+            "user_id": "robot_assembly_01",
+            "description": "Anomalia crítica detectada",
+            "requires_action": True
+        }
+    })
+    
+    alert_id: str = Field(..., description="ID único do alerta")
+    timestamp: datetime = Field(..., description="Timestamp do alerta")
+    severity: Literal["low", "medium", "high", "critical"] = Field(
+        ..., 
+        description="Severidade do alerta"
+    )
+    alert_type: str = Field(..., description="Tipo do alerta")
+    user_id: str = Field(..., description="Usuário relacionado")
+    description: str = Field(..., description="Descrição do alerta")
+    requires_action: bool = Field(..., description="Requer ação imediata")
+    affected_resources: List[str] = Field(
+        default_factory=list, 
+        description="Recursos afetados"
+    )
+
+
+# ============================================================================
+# SCHEMA 8: DATASET METADATA (Metadados do Dataset Completo)
+# ============================================================================
+
+class DatasetMetadata(BaseModel):
+    """
+    Metadados do dataset sintético gerado.
+    """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "dataset_id": "bbac_dataset_v1.0",
+            "creation_date": "2026-01-09T00:00:00",
+            "version": "1.0.0",
+            "total_logs": 100000,
+            "total_users": 50,
+            "robot_count": 40,
+            "human_count": 10,
+            "date_range_start": "2025-12-01T00:00:00",
+            "date_range_end": "2026-01-09T00:00:00",
+            "anomaly_rate": 0.05,
+            "description": "Dataset sintético BBAC Framework"
+        }
+    })
+    
+    dataset_id: str = Field(..., description="ID único do dataset")
+    creation_date: datetime = Field(..., description="Data de criação")
+    version: str = Field(..., description="Versão do dataset")
+    
+    # Estatísticas
+    total_logs: int = Field(..., ge=0, description="Total de logs")
+    total_users: int = Field(..., ge=0, description="Total de usuários únicos")
+    robot_count: int = Field(..., ge=0, description="Número de robôs")
+    human_count: int = Field(..., ge=0, description="Número de humanos")
+    
+    # Cobertura temporal
+    date_range_start: datetime = Field(..., description="Início do período")
+    date_range_end: datetime = Field(..., description="Fim do período")
+    
+    # Distribuições
+    anomaly_rate: float = Field(
+        ..., 
+        ge=0.0, 
+        le=1.0, 
+        description="Taxa de anomalias"
+    )
+    action_distribution: Dict[str, int] = Field(
+        default_factory=dict, 
+        description="Distribuição de tipos de ação"
+    )
+    resource_distribution: Dict[str, int] = Field(
+        default_factory=dict, 
+        description="Distribuição de tipos de recurso"
+    )
+    
+    # Metadados
+    description: str = Field(..., description="Descrição do dataset")
+    generation_parameters: Dict[str, Any] = Field(
+        default_factory=dict, 
+        description="Parâmetros de geração"
+    )
+    quality_metrics: Dict[str, float] = Field(
+        default_factory=dict, 
+        description="Métricas de qualidade"
+    )
+
+
+# ============================================================================
+# HELPER CLASSES
+# ============================================================================
+
+class ValidationResult(BaseModel):
+    """Resultado de validação de dados"""
+    is_valid: bool = Field(..., description="Dados são válidos?")
+    errors: List[str] = Field(default_factory=list, description="Lista de erros")
+    warnings: List[str] = Field(default_factory=list, description="Lista de avisos")
+    validation_timestamp: datetime = Field(
+        default_factory=datetime.now, 
+        description="Timestamp da validação"
+    )
+
+
+# ============================================================================
+# EXPORTAÇÃO
+# ============================================================================
+
+__all__ = [
+    # Enums
+    'AgentType',
+    'RobotType',
+    'HumanRole',
+    'ActionType',
+    'ResourceType',
+    'AccessDecision',
+    'AnomalyType',
+    
+    # Core Schemas
+    'RawLogEntry',
+    'BaselineMetrics',
+    'ExtractedFeatures',
+    'AnomalyScores',
+    'AccessDecisionRecord',
+    'PostAccessLog',
+    
+    # ROS2 Messages
+    'ROS2AccessRequest',
+    'ROS2AccessResponse',
+    'ROS2EmergencyAlert',
+    
+    # Metadata
+    'DatasetMetadata',
+    'ValidationResult',
+]
+
+
+if __name__ == "__main__":
+    # Exemplo de uso e validação
+    print("=" * 80)
+    print("BBAC Framework - Data Schemas")
+    print("=" * 80)
+    print("\nSchemas definidos:")
+    for schema_name in __all__:
+        if not schema_name.startswith('_'):
+            print(f"  ✓ {schema_name}")
+    
+    print("\n" + "=" * 80)
+    print("Testando validação com dados de exemplo...")
+    print("=" * 80)
+    
+    # Teste de validação
+    try:
+        # Exemplo de log válido
+        log = RawLogEntry(
+            log_id="test_001",
+            timestamp=datetime.now(),
+            session_id="session_001",
+            user_id="robot_01",
+            agent_type=AgentType.ROBOT,
+            robot_type=RobotType.ASSEMBLY,
+            action=ActionType.READ,
+            resource="sensor_01",
+            resource_type=ResourceType.SENSOR,
+            human_present=False,
+            emergency_flag=False
+        )
+        print("\n✓ RawLogEntry validation: PASSED")
+        print(f"  Log ID: {log.log_id}")
+        print(f"  User: {log.user_id} ({log.agent_type.value})")
+        
+    except Exception as e:
+        print(f"\n✗ RawLogEntry validation: FAILED")
+        print(f"  Error: {e}")
+    
+    print("\n" + "=" * 80)
+    print("Schemas prontos para geração de dados!")
+    print("=" * 80)
