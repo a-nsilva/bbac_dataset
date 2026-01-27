@@ -136,8 +136,7 @@ O código *não* é incluído no dataset para manter a integridade dos dados pub
 
 ```
 bbac_ics_dataset/
-│
-├── data_structure.md             
+│    
 ├── README.md             
 ├── LICENSE
 ├── data_1m/                      
