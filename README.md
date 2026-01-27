@@ -403,6 +403,7 @@ anomalies <- fromJSON("data_1m/anomaly_metadata.json")
 # Informações básicas
 summary(df)
 table(df$action)
+
 ```
 
 ### Identificar anomalias
@@ -416,71 +417,6 @@ anomaly_logs = df[df['user_id'].isin(anomalous_agents)]
 
 print(f"Logs normais: {len(normal_logs):,}")
 print(f"Logs anômalos: {len(anomaly_logs):,}")
-```
-
----
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@dataset{silva2026bbac_ics_dataset,
-  author = {Alexandre do Nascimento Silva and Nastaran Farhadi-Ghalati and Sanaz Nikghadam-Hojjati and Jos{\'e} Barata and Luiz Estrada Jimenez and Roberto Luiz Souza Monteiro},
-  title = {BBAC-ICS Dataset},
-  journal = {Under Review},
-  year = 2026,
-  doi = {10.5281/zenodo.XXXXXX}
-}
-```
-
----
-
-## License
-
-Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 ```
-CC BY 4.0 - 2025 Alexandre [Sobrenome] et al.
-Full text: https://creativecommons.org/licenses/by/4.0/
-```
-
----
-
-## 👥 Authors & Contact
-
-- **Alexandre do Nascimento Silva** (Corresponding Author)  
-  Universidade Estadual de Santa Cruz (UESC), Departamento de Engenharias e Computação.  
-  Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação em Biossistemas (PPGMSB).  
-  📧 alnsilva@uesc.br
-
-- **Nastaran Farhadi-Ghalati**  
-  UNINOVA—Center of Technology and Systems (CTS).  
-  📧 n.ghalati@campus.fct.unl.pt
-
-- **Sanaz Nikghadam-Hojjati**  
-  UNINOVA—Center of Technology and Systems (CTS).  
-  📧 sanaznik@uninova.pt
-
-- **José Barata**  
-  UNINOVA—Center of Technology and Systems (CTS).  
-  📧 lestrada@uninova.pt
-
-- **Luiz Estrada**  
-  UNINOVA—Center of Technology and Systems (CTS).  
-  📧 jab@uninova.pt
-
-- **Roberto Luiz Souza Monteiro**  
-  Universidade SENAI CIMATEC.  
-  Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação em Biossistemas (PPGMSB).  
-  📧 roberto.monteiro@fieb.org.br
-
-## 🙏 Acknowledgments
-
-This research was supported by:
-- Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES)
-- Universidade Estadual de Santa Cruz (UESC)
-- Universidade do Estado da Bahia (UNEB)
-- UNINOVA—Center of Technology and Systems (CTS)
-
 ---
