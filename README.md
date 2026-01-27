@@ -259,36 +259,36 @@ Estatísticas globais do dataset:
 ## Dataset Statistics
 
 Total agents: 50
-  Robots: 40
-  Humans: 10
+  - Robots: 40
+  - Humans: 10
 
 ### 100k
 General:
-  Total logs: 100,000  
-  Date range: 2025-12-01 00:00:00 to 2025-12-03 23:58:45.411369
+  - Total logs: 100,000  
+  - Date range: 2025-12-01 00:00:00 to 2025-12-03 23:58:45.411369
 
 Actions:
-  access: 2,910 (2.9%)  
-  delete: 666 (0.7%)  
-  execute: 18,505 (18.5%)  
-  modify: 3,668 (3.7%)  
-  monitor: 23,329 (23.3%)  
-  read: 39,835 (39.8%)  
-  write: 11,087 (11.1%)
+  - access: 2,910 (2.9%)  
+  - delete: 666 (0.7%)  
+  - execute: 18,505 (18.5%)  
+  - modify: 3,668 (3.7%)  
+  - monitor: 23,329 (23.3%)  
+  - read: 39,835 (39.8%)  
+  - write: 11,087 (11.1%)
 
 Anomalies:
-  Total: 5000
-  Rate: 5.00%  
-  behavioral_anomaly: 1263 (25.3%)  
-  frequency_anomaly: 999 (20.0%)  
-  resource_anomaly: 500 (10.0%)  
-  sequence_anomaly: 738 (14.8%)  
-  temporal_anomaly: 1500 (30.0%)
+  - Total: 5000
+  - Rate: 5.00%  
+  - behavioral_anomaly: 1263 (25.3%)  
+  - frequency_anomaly: 999 (20.0%)  
+  - resource_anomaly: 500 (10.0%)  
+  - sequence_anomaly: 738 (14.8%)  
+  - temporal_anomaly: 1500 (30.0%)
 
 ### 300k
 General:
-  Total logs: 300,000  
-  Date range: 2025-12-01 00:00:00 to 2025-12-11 23:57:17.421717
+- Total logs: 300,000  
+- Date range: 2025-12-01 00:00:00 to 2025-12-11 23:57:17.421717
 
 Actions:
   access: 8,939 (3.0%)  
@@ -450,24 +450,24 @@ Full text: https://creativecommons.org/licenses/by/4.0/
 ## 👥 Authors & Contact
 
 - **Alexandre do Nascimento Silva** (Corresponding Author)  
-  Universidade Estadual de Santa Cruz (UESC), Departamento de Engenharias e Computação. 
-  Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação em Biossistemas (PPGMSB). 
+  Universidade Estadual de Santa Cruz (UESC), Departamento de Engenharias e Computação.  
+  Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação em Biossistemas (PPGMSB).  
   📧 alnsilva@uesc.br
 
 - **Nastaran Farhadi-Ghalati**
-  UNINOVA—Center of Technology and Systems (CTS). 
+  UNINOVA—Center of Technology and Systems (CTS).  
   📧 n.ghalati@campus.fct.unl.pt
 
 - **Sanaz Nikghadam-Hojjati**  
-  UNINOVA—Center of Technology and Systems (CTS). 
+  UNINOVA—Center of Technology and Systems (CTS).  
   📧 sanaznik@uninova.pt
 
 - **José Barata**  
-  UNINOVA—Center of Technology and Systems (CTS). 
+  UNINOVA—Center of Technology and Systems (CTS).  
   📧 lestrada@uninova.pt
 
 - **Luiz Estrada**  
-  UNINOVA—Center of Technology and Systems (CTS). 
+  UNINOVA—Center of Technology and Systems (CTS).  
   📧 jab@uninova.pt
 
 - **Roberto Luiz Souza Monteiro**  
