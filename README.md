@@ -79,37 +79,37 @@ O dataset é 100% sintético — nenhum dado industrial real foi utilizado.
 ### Pipeline Completo
 
 ```
-1. REQUISIÇÃO
-   RawLogEntry → Sistema
+1. REQUISIÇÃO  
+   RawLogEntry → Sistema  
 
-2. FILTRAGEM E ORDENAÇÃO
-   Filter by user_id, robot_id
-   Sort by timestamp
+2. FILTRAGEM E ORDENAÇÃO  
+   Filter by user_id, robot_id  
+   Sort by timestamp  
 
-3. DECISÃO HFVL (High/Low Frequency)
+3. DECISÃO HFVL (High/Low Frequency)  
    Calculate action frequency
    
-4. BASELINE CHECK
-   Load BaselineMetrics for user
-   If not exists → Calculate from historical data
+4. BASELINE CHECK  
+   Load BaselineMetrics for user  
+   If not exists → Calculate from historical data  
 
 5. FEATURE EXTRACTION
-   RawLogEntry → ExtractedFeatures
+   RawLogEntry → ExtractedFeatures  
    
 6. ANOMALY DETECTION
-   Branch 1: Statistical Analysis → statistical_score
-   Branch 2: Sequential Model → sequential_score
+   Branch 1: Statistical Analysis → statistical_score  
+   Branch 2: Sequential Model → sequential_score  
    Combine → final_score
 
 7. ACCESS DECISION
-   Apply 3-Layer BBAC:
+   Apply 3-Layer BBAC:  
      - Layer 1: Rule-based (policy_score)
      - Layer 2: Behavioral (Markov)
      - Layer 3: ML Anomaly (scores)
    Output → AccessDecisionRecord
 
 8. POST-ACCESS
-   Monitor activities → PostAccessLog
+   Monitor activities → PostAccessLog  
    Feedback → Update baseline/model
 
 ```
@@ -264,94 +264,94 @@ Total agents: 50
 
 ### 100k
 General:
-  Total logs: 100,000
+  Total logs: 100,000  
   Date range: 2025-12-01 00:00:00 to 2025-12-03 23:58:45.411369
 
 Actions:
-  access: 2,910 (2.9%)
-  delete: 666 (0.7%)
-  execute: 18,505 (18.5%)
-  modify: 3,668 (3.7%)
-  monitor: 23,329 (23.3%)
-  read: 39,835 (39.8%)
+  access: 2,910 (2.9%)  
+  delete: 666 (0.7%)  
+  execute: 18,505 (18.5%)  
+  modify: 3,668 (3.7%)  
+  monitor: 23,329 (23.3%)  
+  read: 39,835 (39.8%)  
   write: 11,087 (11.1%)
 
 Anomalies:
   Total: 5000
-  Rate: 5.00%
-  behavioral_anomaly: 1263 (25.3%)
-  frequency_anomaly: 999 (20.0%)
-  resource_anomaly: 500 (10.0%)
-  sequence_anomaly: 738 (14.8%)
+  Rate: 5.00%  
+  behavioral_anomaly: 1263 (25.3%)  
+  frequency_anomaly: 999 (20.0%)  
+  resource_anomaly: 500 (10.0%)  
+  sequence_anomaly: 738 (14.8%)  
   temporal_anomaly: 1500 (30.0%)
 
 ### 300k
 General:
-  Total logs: 300,000
+  Total logs: 300,000  
   Date range: 2025-12-01 00:00:00 to 2025-12-11 23:57:17.421717
 
 Actions:
-  access: 8,939 (3.0%)
-  delete: 2,090 (0.7%)
-  execute: 55,153 (18.4%)
-  modify: 10,957 (3.7%)
-  monitor: 71,354 (23.8%)
-  read: 118,957 (39.7%)
+  access: 8,939 (3.0%)  
+  delete: 2,090 (0.7%)  
+  execute: 55,153 (18.4%)  
+  modify: 10,957 (3.7%)  
+  monitor: 71,354 (23.8%)  
+  read: 118,957 (39.7%)  
   write: 32,550 (10.8%)
 
 Anomalies:
   Total: 15000
-  Rate: 5.00%
-  behavioral_anomaly: 3825 (25.5%)
-  frequency_anomaly: 3008 (20.1%)
-  resource_anomaly: 1488 (9.9%)
-  sequence_anomaly: 2283 (15.2%)
+  Rate: 5.00%  
+  behavioral_anomaly: 3825 (25.5%)  
+  frequency_anomaly: 3008 (20.1%)  
+  resource_anomaly: 1488 (9.9%)  
+  sequence_anomaly: 2283 (15.2%)  
   temporal_anomaly: 4396 (29.3%)
 
 ### 500k
 General:
-  Total logs: 500,000
+  Total logs: 500,000  
   Date range: 2025-12-01 00:00:00 to 2025-12-19 22:44:54.772359
 
 Actions:
-  access: 14,763 (3.0%)
-  delete: 3,453 (0.7%)
-  execute: 92,414 (18.5%)
-  modify: 18,537 (3.7%)
-  monitor: 117,703 (23.5%)
-  read: 198,824 (39.8%)
+  access: 14,763 (3.0%)  
+  delete: 3,453 (0.7%)  
+  execute: 92,414 (18.5%)  
+  modify: 18,537 (3.7%)  
+  monitor: 117,703 (23.5%)  
+  read: 198,824 (39.8%)  
   write: 54,306 (10.9%)
 
 Anomalies:
   Total: 25000
-  Rate: 5.00%
-  behavioral_anomaly: 6341 (25.4%)
-  frequency_anomaly: 5000 (20.0%)
-  resource_anomaly: 2410 (9.6%)
-  sequence_anomaly: 3699 (14.8%)
+  Rate: 5.00%  
+  behavioral_anomaly: 6341 (25.4%)  
+  frequency_anomaly: 5000 (20.0%)  
+  resource_anomaly: 2410 (9.6%)  
+  sequence_anomaly: 3699 (14.8%)  
   temporal_anomaly: 7550 (30.2%)
 
 ### 1m
 General:
-  Total logs: 1,000,000
+  Total logs: 1,000,000  
   Date range: 2025-12-01 00:00:00 to 2026-01-07 23:27:32.984393
 
 Actions:
-  access: 29,678 (3.0%)
-  delete: 6,877 (0.7%)
-  execute: 184,917 (18.5%)
-  modify: 36,638 (3.7%)
-  monitor: 236,597 (23.7%)
-  read: 396,935 (39.7%)
+  access: 29,678 (3.0%)  
+  delete: 6,877 (0.7%)  
+  execute: 184,917 (18.5%)  
+  modify: 36,638 (3.7%)  
+  monitor: 236,597 (23.7%)  
+  read: 396,935 (39.7%)  
   write: 108,358 (10.8%)
 
 Anomalies:
   Total: 50000
-  Rate: 5.00%
-  behavioral_anomaly: 12658 (25.3%)
-  frequency_anomaly: 10062 (20.1%)
-  resource_anomaly: 4802 (9.6%)
-  sequence_anomaly: 7484 (15.0%)
+  Rate: 5.00%  
+  behavioral_anomaly: 12658 (25.3%)  
+  frequency_anomaly: 10062 (20.1%)  
+  resource_anomaly: 4802 (9.6%)  
+  sequence_anomaly: 7484 (15.0%)  
   temporal_anomaly: 14994 (30.0%)
 
 ---
